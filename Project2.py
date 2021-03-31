@@ -15,14 +15,21 @@ def get_titles_from_search_results(filename):
     [('Book title 1', 'Author 1'), ('Book title 2', 'Author 2')...]
     """
 
-    url = "search_results.htm"
-    r = requests.get(url)
-    soup = BeautifulSoup(r.text, "html.parser")
+    l = []
 
+    with open(filename) as f:
 
+        soup = BeautifulSoup(f, "html.parser")
+        selections = soup.findAll("tr")
 
-    pass
+        for selection in selections:
 
+            title = selection.find("a", class_="bookTitle")
+            auth = selection.find("a", class_="authorName")
+
+            l.append((title.text.strip(), auth.text.strip()))
+
+        return l
 
 def get_search_links():
     """
@@ -38,8 +45,9 @@ def get_search_links():
 
     """
 
-    pass
+    l = []
 
+    pass
 
 def get_book_summary(book_url):
     """
@@ -108,21 +116,39 @@ class TestCases(unittest.TestCase):
 
     # call get_search_links() and save it to a static variable: search_urls
 
-
     def test_get_titles_from_search_results(self):
         # call get_titles_from_search_results() on search_results.htm and save to a local variable
 
+        storage = get_titles_from_search_results("search_results.htm")
+
         # check that the number of titles extracted is correct (20 titles)
+
+        self.assertEqual(len(storage), 20)
 
         # check that the variable you saved after calling the function is a list
 
+       # self.assertEqual(isinstance(storage, list), storage)
+        self.assertIsInstance(storage, list)
+
         # check that each item in the list is a tuple
+
+        for item in storage:
+
+           # self.assertEqual(isinstance(item, tuple), item)
+            self.assertIsInstance(item, tuple)
 
         # check that the first book and author tuple is correct (open search_results.htm and find it)
 
+        self.assertEqual(storage[0], ("Harry Potter and the Deathly Hallows (Harry Potter, #7)", "J.K. Rowling"))
+
         # check that the last title is correct (open search_results.htm and find it)
 
+        self.assertEqual(storage[-1], ("Harry Potter: The Prequel (Harry Potter, #0.5)", "J.K. Rowling"))
+
     def test_get_search_links(self):
+
+        pass
+
         # check that TestCases.search_urls is a list
 
         # check that the length of TestCases.search_urls is correct (10 URLs)
@@ -133,6 +159,8 @@ class TestCases(unittest.TestCase):
 
 
     def test_get_book_summary(self):
+
+        pass
         # create a local variable – summaries – a list containing the results from get_book_summary()
         # for each URL in TestCases.search_urls (should be a list of tuples)
 
@@ -148,8 +176,9 @@ class TestCases(unittest.TestCase):
 
             # check that the first book in the search has 337 pages
 
-
     def test_summarize_best_books(self):
+
+        pass
         # call summarize_best_books and save it to a variable
 
         # check that we have the right number of best books (20)
@@ -164,6 +193,9 @@ class TestCases(unittest.TestCase):
 
 
     def test_write_csv(self):
+
+        pass
+
         # call get_titles_from_search_results on search_results.htm and save the result to a variable
 
         # call write csv on the variable you saved and 'test.csv'
