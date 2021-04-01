@@ -5,7 +5,6 @@ import os
 import csv
 import unittest
 
-
 def get_titles_from_search_results(filename):
     """
     Write a function that creates a BeautifulSoup object on "search_results.htm". Parse
@@ -45,9 +44,25 @@ def get_search_links():
 
     """
 
+    initial_url = "https://www.goodreads.com/search?q=fantasy&qid=NwUsLiA2Nc"
     l = []
+    r = requests.get(initial_url)
 
-    pass
+    soup = BeautifulSoup(r.text, "html.parser")
+
+    tables = soup.find("table", class_="tableList")
+    all_rows = tables.find_all("tr")
+
+    domain = "https://www.goodreads.com"
+    for row in all_rows[:10]:
+
+        target = row.findAll("td")
+        web_addr = target[0].find("a")
+        new_link = domain + str(web_addr["href"])
+        l.append(new_link)
+
+    print(l)
+    return l
 
 def get_book_summary(book_url):
     """
@@ -116,6 +131,8 @@ class TestCases(unittest.TestCase):
 
     # call get_search_links() and save it to a static variable: search_urls
 
+    search_urls = get_search_links()
+
     def test_get_titles_from_search_results(self):
         # call get_titles_from_search_results() on search_results.htm and save to a local variable
 
@@ -147,16 +164,23 @@ class TestCases(unittest.TestCase):
 
     def test_get_search_links(self):
 
-        pass
-
         # check that TestCases.search_urls is a list
+        self.assertIsInstance(TestCases.search_urls, list)
 
         # check that the length of TestCases.search_urls is correct (10 URLs)
-
+        self.assertEqual(len(TestCases.search_urls), 10)
 
         # check that each URL in the TestCases.search_urls is a string
+
+        for url in TestCases.search_urls:
+
+            self.assertIsInstance(url, str)
+
         # check that each URL contains the correct url for Goodreads.com followed by /book/show/
 
+        for url in TestCases.search_urls:
+
+            self.assertEqual(url[:36], "https://www.goodreads.com/book/show/")
 
     def test_get_book_summary(self):
 
