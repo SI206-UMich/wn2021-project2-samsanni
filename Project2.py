@@ -41,7 +41,6 @@ def get_search_links():
     Notice that you should ONLY add URLs that start with "https://www.goodreads.com/book/show/" to 
     your list, and , and be sure to append the full path to the URL so that the url is in the format 
     “https://www.goodreads.com/book/show/kdkd".
-
     """
 
     initial_url = "https://www.goodreads.com/search?q=fantasy&qid=NwUsLiA2Nc"
@@ -78,8 +77,13 @@ def get_book_summary(book_url):
     Make sure to strip() any newlines from the book title and number of pages.
     """
 
-    pass
+    r = requests.get(book_url)
+    soup = BeautifulSoup(r.text, "html.parser")
 
+    title_author = get_titles_from_search_results()
+
+
+    pass
 
 def summarize_best_books(filepath):
     """
@@ -115,8 +119,14 @@ def write_csv(data, filename):
 
     This function should not return anything.
     """
-    pass
 
+    ex = ["Book Title", "Author Name"]
+
+    with open(filename, "w") as f:
+
+        write = csv.writer(f)
+        write.writerow(ex)
+        write.writerows(data)
 
 def extra_credit(filepath):
     """
@@ -215,27 +225,36 @@ class TestCases(unittest.TestCase):
 
         # check that the last tuple is made up of the following 3 strings: 'Picture Books', 'Antiracist Baby', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'
 
-
     def test_write_csv(self):
 
-        pass
-
         # call get_titles_from_search_results on search_results.htm and save the result to a variable
+        storage = get_titles_from_search_results("search_results.htm")
 
         # call write csv on the variable you saved and 'test.csv'
+        write_csv(storage, "test.csv")
 
         # read in the csv that you wrote (create a variable csv_lines - a list containing all the lines in the csv you just wrote to above)
+        csv_lines = []
 
+        with open("test.csv", "r") as f:
+
+            file = csv.reader(f)
+
+            for line in file:
+
+                csv_lines.append(line)
 
         # check that there are 21 lines in the csv
+        self.assertEqual(len(csv_lines), 21)
 
         # check that the header row is correct
+        self.assertEqual(csv_lines[0], ["Book Title", "Author Name"])
 
         # check that the next row is 'Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling'
+        self.assertEqual(csv_lines[1], ["Harry Potter and the Deathly Hallows (Harry Potter, #7)", "J.K. Rowling"])
 
         # check that the last row is 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'J.K. Rowling'
-
-
+        self.assertEqual(csv_lines[-1], ["Harry Potter: The Prequel (Harry Potter, #0.5)", "J.K. Rowling"])
 
 if __name__ == '__main__':
     print(extra_credit("extra_credit.htm"))
