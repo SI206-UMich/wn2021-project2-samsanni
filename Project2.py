@@ -196,9 +196,18 @@ class TestCases(unittest.TestCase):
 
         pass
         # create a local variable – summaries – a list containing the results from get_book_summary()
+
+        summaries = get_book_summary()
+
         # for each URL in TestCases.search_urls (should be a list of tuples)
 
+        for url in TestCases.search_urls:
+
+            self.assertIsInstance(url, list[tuple])
+
         # check that the number of book summaries is correct (10)
+
+        self.assertEqual(len(get_book_summary(summaries)), 10)
 
             # check that each item in the list is a tuple
 
