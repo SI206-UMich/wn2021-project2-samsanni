@@ -80,10 +80,18 @@ def get_book_summary(book_url):
     r = requests.get(book_url)
     soup = BeautifulSoup(r.text, "html.parser")
 
-    title_author = get_titles_from_search_results()
+    shell = ()
 
+    title = soup.find("h1", class_="gr-h1 gr-h1--serif")
+    auth = soup.find("a", class_="authorName")
+    pgs = soup.find("span", itemprop="numberOfPages")
+    strip_pgs = pgs.text.strip()
 
-    pass
+    num_pgs = int((strip_pgs.split())[0])
+
+    shell = (title.text.strip(), auth.text.strip(), num_pgs)
+
+    return shell
 
 def summarize_best_books(filepath):
     """
@@ -96,8 +104,29 @@ def summarize_best_books(filepath):
     ("Fiction", "The Testaments (The Handmaid's Tale, #2)", "https://www.goodreads.com/choiceawards/best-fiction-books-2020") 
     to your list of tuples.
     """
-    pass
 
+    """ lxml parser error: raise FeatureNotFound(
+    # bs4.FeatureNotFound: Couldn't find a tree builder with the features you requested: lxml. Do you need to install a parser library?
+    """
+
+    l = []
+
+    with open(filepath, "r") as f:
+
+        reader = f.read()
+        soup = BeautifulSoup(reader, "html.parser")
+        all_books = soup.findAll("div", class_="category clearFix")
+
+        for book in all_books:
+
+            genre = book.find("h4", class_="category__copy")
+            strip_genre = genre.text.strip()
+            title = book.find("img", class_="category__winnerImage")["alt"]
+            url = book.find("a")["href"]
+
+            l.append((strip_genre, title, url))
+
+        return l
 
 def write_csv(data, filename):
     """
@@ -194,45 +223,66 @@ class TestCases(unittest.TestCase):
 
     def test_get_book_summary(self):
 
-        pass
         # create a local variable – summaries – a list containing the results from get_book_summary()
 
-        summaries = get_book_summary()
+        summaries = []
 
         # for each URL in TestCases.search_urls (should be a list of tuples)
 
-        for url in TestCases.search_urls:
+        for result in TestCases.search_urls:
 
-            self.assertIsInstance(url, list[tuple])
+            summaries.append(get_book_summary(result))
 
         # check that the number of book summaries is correct (10)
 
-        self.assertEqual(len(get_book_summary(summaries)), 10)
+        self.assertEqual(len(summaries), 10)
+
+        for item in summaries:
 
             # check that each item in the list is a tuple
+            self.assertIsInstance(item, tuple)
 
             # check that each tuple has 3 elements
+            self.assertEqual(len(item), 3)
 
             # check that the first two elements in the tuple are string
+            # self.assertIsInstance(item[:2], str)
+            self.assertIsInstance(item[0], str)
+            self.assertIsInstance(item[1], str)
 
             # check that the third element in the tuple, i.e. pages is an int
+            self.assertIsInstance(item[2], int)
 
             # check that the first book in the search has 337 pages
+            self.assertEqual(summaries[0][2], 337)
 
     def test_summarize_best_books(self):
 
-        pass
         # call summarize_best_books and save it to a variable
+
+        storage = summarize_best_books("best_books_2020.htm")
 
         # check that we have the right number of best books (20)
 
-            # assert each item in the list of best books is a tuple
+        self.assertEqual(len(storage), 20)
 
-            # check that each tuple has a length of 3
+        # assert each item in the list of best books is a tuple
+
+        for item in storage:
+
+            self.assertIsInstance(item, tuple)
+
+        # check that each tuple has a length of 3
+
+            self.assertEqual(len(item), 3)
 
         # check that the first tuple is made up of the following 3 strings:'Fiction', "The Midnight Library", 'https://www.goodreads.com/choiceawards/best-fiction-books-2020'
 
+        self.assertEqual(storage[0], ("Fiction", "The Midnight Library", "https://www.goodreads.com/choiceawards/best-fiction-books-2020"))
+
         # check that the last tuple is made up of the following 3 strings: 'Picture Books', 'Antiracist Baby', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'
+
+        self.assertEqual(storage[-1], ("Picture Books", "Antiracist Baby", "https://www.goodreads.com/choiceawards/best-picture-books-2020"))
 
     def test_write_csv(self):
 
